@@ -11,7 +11,7 @@ include 'list_funcs.php';
 $email_to = list_get_active_to_addrs_as_string('example');
 
 // how to prefix the subject line (e.g., project name)
-$email_subj_prefix = "[ENVI]";
+$email_subj_prefix = "[EXAMPLE]";
 
 // example input (should really set this by: $json = $_POST['payload'];)
 $json = <<<JSON
