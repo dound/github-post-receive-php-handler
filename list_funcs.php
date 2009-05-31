@@ -34,7 +34,7 @@ function list_email($list, $subj, $body) {
         $to .= "$a,";
     }
 
-    $headers = "From: $list List <noreply@yuba.stanford.edu>\r\n";
+    $headers = "From: noreply@yuba.stanford.edu ($list List)\r\n";
     return mail($to, $subj, $body, $headers);
 }
 
@@ -167,7 +167,7 @@ $admin_txt
 $active_txt
 Leave the list: $url/list.php?list=$list&addr=$addr&code=$code&action=leave
 BODY;
-    $headers = "From: $list List <noreply@yuba.stanford.edu>\r\n";
+    $headers = "From: noreply@yuba.stanford.edu ($list List)\r\n";
     mail($addr, "$list List", $body, $headers);
 }
 
