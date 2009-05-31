@@ -1,13 +1,16 @@
-The github_post_receive.php script provides a function which will decode the 
-post-receive JSON object which github sends whenever a push occurs.  An 
+The github_post_receive.php script provides a function which will decode the
+post-receive JSON object which github sends whenever a push occurs.  An
 example of how to use it is provided in example_post_receive.php.  You can
 ask github to send you the JSON whenever someone pushes into the repository
 by going to the github Admin page, then the Service Hooks tab, and a URL to
 the Post-Receive URLs list.
 
-In addition, a very simple script list.php provides an interface to let 
+In addition, a very simple script list.php provides an interface to let
 users sign up to receive emails from you (in particular, the post-receive
-emails).  If you decide to use this, use list_create.php to create your 
+emails).  If you decide to use this, use list_create.php to create your
 list and then remove that file.  In the future, it would be nice to email
 a project's watchers when a change occurs, but there is no support in the
 github API to get their usernames at the moment.
+
+Subscribe to this project's post-receive updates at:
+http://yuba.stanford.edu/github/list.php?list=github-post-receive-php-handler&co=1
