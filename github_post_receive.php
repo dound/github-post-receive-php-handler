@@ -6,6 +6,27 @@
  * @version 0.1 (updated 31-May-2009 @ 06:01 PDT)
  */
 
+define('SEND_HTML_EMAIL', true);
+
+// some constants for HTML tags
+define('HTML_HEADER',         SEND_HTML_EMAIL ? '<html><body>' : '');
+define('HTML_BR',             SEND_HTML_EMAIL ? '<br/>' : "\n");
+define('HTML_P',              SEND_HTML_EMAIL ? '<p>' : "\n");
+define('HTML_P_END',          SEND_HTML_EMAIL ? '</p>' : "\n");
+define('HTML_BLOCKQUOTE',     SEND_HTML_EMAIL ? '<blockquote>' : "\n");
+define('HTML_BLOCKQUOTE_END', SEND_HTML_EMAIL ? '</blockquote>' : '');
+define('HTML_FOOTER',         SEND_HTML_EMAIL ? '</body></html>' : '');
+
+/** Generates a URL based on SEND_HTML_EMAIL. */
+function make_url($url, $text, $is_mail_to) {
+    if(SEND_HTML_EMAIL)
+        return '<a href="' . ($is_mail_to ? 'mailto:' : '') . $url .'">' . $text . '</a>';
+    elseif($is_mail_to)
+        return $url;
+    else
+        return "$text ($url)";
+}
+
 /**
  * Emails information about a push specified by github's JSON format.
  *
@@ -55,13 +76,11 @@ function mail_github_post_receive($to, $subj_header, $github_json) {
             $modified = array_merge($modified, $commit->{'modified'});
         }
 
-        $commits .= <<<CI
-Commit: <a href="$url">$id</a>
-Author: $author_name (<a href="mailto:$author_email">$author_email</a>)
-Date: $date
-<blockquote>$msg</blockquote>
-
-CI;
+        $commits .=
+            HTML_P  . 'Commit: ' . make_url($url, $id, false) .
+            HTML_BR . "Author: $author_name (" . make_url($author_email, $author_email, true) . ')' .
+            HTML_BR . "Date: $date" .
+            HTML_BLOCKQUOTE . $msg . HTML_BLOCKQUOTE_END . HTML_P_END;
     }
 
     // create a list of aggregate additions/deletions/modifications
@@ -69,11 +88,11 @@ CI;
     $changes_txt = '';
     foreach($changes as $what => $what_list) {
         if(count($what_list) > 0) {
-            $changes_txt .= "$what:\n";
+            $changes_txt .= HTML_BR . "$what:" . HTML_BR;
             $items = array_unique($what_list);
             sort($items);
             foreach($items as $item) {
-                $changes_txt .= " -- $item\n";
+                $changes_txt .= " -- $item" . HTML_BR;
             }
         }
     }
@@ -83,16 +102,22 @@ CI;
     $name = $repo->{'name'};
     $url = $repo->{'url'};
     $commits_noun = ($num_commits == 1) ? 'commit' : 'commits';
-    $body = <<<BODY
-This automated email contains information about $num_commits new $commits_noun which have been
-pushed to the '$name' repo located at $url.
+    $body = HTML_HEADER .
+        "This automated email contains information about $num_commits new $commits_noun which have been\n" .
+        "pushed to the '$name' repo located at $url.\n" .
+        "\n" .
+        $commits .
+        $changes_txt .
+        HTML_FOOTER;
 
-$commits
-$changes_txt
-BODY;
+    // build the mail headers
+    $headers = "From: noreply@yuba.stanford.edu ($subj_header Mailer)\r\n";
+    if(SEND_HTML_EMAIL)
+        $headers .= "MIME-Version: 1.0\r\n" .
+                    "Content-type: text/html\r\n";
 
     // send the mail
-    if(!mail($to, $subj, $body))
+    if(!mail($to, $subj, $body, $headers))
         error_log("failed to email github info to '$to' ($subj, $body)");
     else {
         $body = str_replace("\n", '<br/>', $body);
