@@ -80,7 +80,7 @@ function mail_github_post_receive($to, $subj_header, $github_json) {
             HTML_P  . 'Commit: ' . make_url($url, $id, false) .
             HTML_BR . "Author: $author_name (" . make_url($author_email, $author_email, true) . ')' .
             HTML_BR . "Date: $date" .
-            HTML_BLOCKQUOTE . $msg . HTML_BLOCKQUOTE_END . HTML_P_END;
+            HTML_BLOCKQUOTE . str_replace("\n", '<br/>', $msg) . HTML_BLOCKQUOTE_END . HTML_P_END;
     }
 
     // create a list of aggregate additions/deletions/modifications
